@@ -104,6 +104,10 @@ class PWMOut(object):
 
         self._set_enabled(True)
 
+    def deinit(self):
+      """Deinitializes the PWMOut and releases any hardware resources for reuse"""
+      self.close()
+
     def close(self):
         """Close the sysfs PWM."""
         if self._channel is not None:
