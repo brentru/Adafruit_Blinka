@@ -138,10 +138,15 @@ class PWMOut(object):
 
         with open(path, 'r') as f_attr:
             return f_attr.read().strip()
+    
+    def deinit(self):
+        self.close()
 
     # Mutable properties
 
     def _get_period(self):
+        if self._pwmpin is None:
+            raise ValueError('Object has been deinitialized and can no longer be used. Create a new object.')
         try:
             period_ns = int(self._read_pin_attr(self._pin_period_path))
         except ValueError:
@@ -177,6 +182,8 @@ class PWMOut(object):
     """
 
     def _get_duty_cycle(self):
+        if self._pwmpin is None:
+            raise ValueError('Object has been deinitialized and can no longer be used. Create a new object.')
         try:
             duty_cycle_ns = int(self._read_pin_attr(self._pin_duty_cycle_path))
         except ValueError:
