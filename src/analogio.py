@@ -19,6 +19,9 @@ from adafruit_blinka.agnostic import detector
 if detector.board.microchip_mcp2221:
     from adafruit_blinka.microcontroller.mcp2221.analogio import AnalogIn
     from adafruit_blinka.microcontroller.mcp2221.analogio import AnalogOut
+elif detector.board.fake_microchip_mcp2221:
+    from adafruit_blinka.microcontroller.fake_mcp2221.analogio import AnalogIn
+    from adafruit_blinka.microcontroller.fake_mcp2221.analogio import AnalogOut
 elif detector.board.greatfet_one:
     from adafruit_blinka.microcontroller.nxp_lpc4330.analogio import AnalogIn
     from adafruit_blinka.microcontroller.nxp_lpc4330.analogio import AnalogOut

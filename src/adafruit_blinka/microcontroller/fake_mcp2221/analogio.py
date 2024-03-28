@@ -8,7 +8,7 @@ See `CircuitPython:analogio` in CircuitPython for more details.
 * Author(s): Carter Nelson
 """
 
-from adafruit_blinka.microcontroller.mcp2221.pin import Pin
+from adafruit_blinka.microcontroller.fake_mcp2221.pin import Pin
 from adafruit_blinka import ContextManaged
 
 

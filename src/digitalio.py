@@ -128,6 +128,8 @@ elif detector.board.greatfet_one:
     from adafruit_blinka.microcontroller.nxp_lpc4330.pin import Pin
 elif detector.board.microchip_mcp2221:
     from adafruit_blinka.microcontroller.mcp2221.pin import Pin
+elif detector.board.fake_microchip_mcp2221:
+    from adafruit_blinka.microcontroller.fake_mcp2221.pin import Pin
 elif detector.chip.RP2040_U2IF:
     from adafruit_blinka.microcontroller.rp2040_u2if.pin import Pin
 # MicroPython Chips

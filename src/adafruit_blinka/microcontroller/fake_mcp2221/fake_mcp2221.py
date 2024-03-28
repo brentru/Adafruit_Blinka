@@ -9,6 +9,9 @@ import atexit
 
 import hid
 
+# TODO: Remove all the unnecessary calls to the hid device
+# as we're faking the MCP2221A
+
 # Here if you need it
 MCP2221_HID_DELAY = float(os.environ.get("BLINKA_MCP2221_HID_DELAY", 0))
 # Use to set delay between reset and device reopen. if negative, don't reset at all
@@ -218,152 +221,52 @@ class MCP2221:
     # I2C
     # ----------------------------------------------------------------
     def _i2c_status(self):
+        pass
+        """
         resp = self._hid_xfer(b"\x10")
         if resp[1] != 0:
             raise RuntimeError("Couldn't get I2C status")
         return resp
+        """
 
     def _i2c_state(self):
-        return self._i2c_status()[8]
+        pass
+        # return self._i2c_status()[8]
 
     def _i2c_cancel(self):
+        pass
+        """
         resp = self._hid_xfer(b"\x10\x00\x10")
         if resp[1] != 0x00:
             raise RuntimeError("Couldn't cancel I2C")
         if resp[2] == 0x10:
             # bus release will need "a few hundred microseconds"
             time.sleep(0.001)
+        """
 
     # pylint: disable=too-many-arguments,too-many-branches
     def _i2c_write(self, cmd, address, buffer, start=0, end=None):
-        if self._i2c_state() != 0x00:
-            self._i2c_cancel()
+        pass
 
-        end = end if end else len(buffer)
-        length = end - start
-        retries = 0
-
-        while (end - start) > 0 or not buffer:
-            chunk = min(end - start, MCP2221_MAX_I2C_DATA_LEN)
-            # write out current chunk
-            resp = self._hid_xfer(
-                bytes([cmd, length & 0xFF, (length >> 8) & 0xFF, address << 1])
-                + buffer[start : (start + chunk)]
-            )
-            # check for success
-            if resp[1] != 0x00:
-                if resp[2] in (
-                    RESP_I2C_START_TOUT,
-                    RESP_I2C_WRADDRL_TOUT,
-                    RESP_I2C_WRADDRL_NACK,
-                    RESP_I2C_WRDATA_TOUT,
-                    RESP_I2C_STOP_TOUT,
-                ):
-                    raise RuntimeError("Unrecoverable I2C state failure")
-                retries += 1
-                if retries >= MCP2221_RETRY_MAX:
-                    raise RuntimeError("I2C write error, max retries reached.")
-                time.sleep(0.001)
-                continue  # try again
-            # yay chunk sent!
-            while self._i2c_state() == RESP_I2C_PARTIALDATA:
-                time.sleep(0.001)
-            if not buffer:
-                break
-            start += chunk
-            retries = 0
-
-        # check status in another loop
-        for _ in range(MCP2221_RETRY_MAX):
-            status = self._i2c_status()
-            if status[20] & MASK_ADDR_NACK:
-                raise RuntimeError("I2C slave address was NACK'd")
-            usb_cmd_status = status[8]
-            if usb_cmd_status == 0:
-                break
-            if usb_cmd_status == RESP_I2C_WRITINGNOSTOP and cmd == 0x94:
-                break  # this is OK too!
-            if usb_cmd_status in (
-                RESP_I2C_START_TOUT,
-                RESP_I2C_WRADDRL_TOUT,
-                RESP_I2C_WRADDRL_NACK,
-                RESP_I2C_WRDATA_TOUT,
-                RESP_I2C_STOP_TOUT,
-            ):
-                raise RuntimeError("Unrecoverable I2C state failure")
-            time.sleep(0.001)
-        else:
-            raise RuntimeError("I2C write error: max retries reached.")
-        # whew success!
 
     def _i2c_read(self, cmd, address, buffer, start=0, end=None):
-        if self._i2c_state() not in (RESP_I2C_WRITINGNOSTOP, 0):
-            self._i2c_cancel()
-
-        end = end if end else len(buffer)
-        length = end - start
-
-        # tell it we want to read
-        resp = self._hid_xfer(
-            bytes([cmd, length & 0xFF, (length >> 8) & 0xFF, (address << 1) | 0x01])
-        )
-
-        # check for success
-        if resp[1] != 0x00:
-            raise RuntimeError("Unrecoverable I2C read failure")
-
-        # and now the read part
-        while (end - start) > 0:
-            for _ in range(MCP2221_RETRY_MAX):
-                # the actual read
-                resp = self._hid_xfer(b"\x40")
-                # check for success
-                if resp[1] == RESP_I2C_PARTIALDATA:
-                    time.sleep(0.001)
-                    continue
-                if resp[1] != 0x00:
-                    raise RuntimeError("Unrecoverable I2C read failure")
-                if resp[2] == RESP_ADDR_NACK:
-                    raise RuntimeError("I2C NACK")
-                if resp[3] == 0x00 and resp[2] == 0x00:
-                    break
-                if resp[3] == RESP_READ_ERR:
-                    time.sleep(0.001)
-                    continue
-                if resp[2] in (RESP_READ_COMPL, RESP_READ_PARTIAL):
-                    break
-            else:
-                raise RuntimeError("I2C read error: max retries reached.")
-
-            # move data into buffer
-            chunk = min(end - start, 60)
-            for i, k in enumerate(range(start, start + chunk)):
-                buffer[k] = resp[4 + i]
-            start += chunk
+        pass
 
     # pylint: enable=too-many-arguments
 
     def _i2c_configure(self, baudrate=100000):
         """Configure I2C"""
-        self._hid_xfer(
-            bytes(
-                [
-                    0x10,  # set parameters
-                    0x00,  # don't care
-                    0x00,  # no effect
-                    0x20,  # next byte is clock divider
-                    12000000 // baudrate - 3,
-                ]
-            )
-        )
+        pass
 
     def i2c_writeto(self, address, buffer, *, start=0, end=None):
         """Write data from the buffer to an address"""
-        self._i2c_write(0x90, address, buffer, start, end)
+        pass
+        # self._i2c_write(0x90, address, buffer, start, end)
 
     def i2c_readfrom_into(self, address, buffer, *, start=0, end=None):
         """Read data from an address and into the buffer"""
-        self._i2c_read(0x91, address, buffer, start, end)
+        pass
+        # self._i2c_read(0x91, address, buffer, start, end)
 
     def i2c_writeto_then_readfrom(
         self,
@@ -379,11 +282,14 @@ class MCP2221:
         """Write data from buffer_out to an address and then
         read data from an address and into buffer_in
         """
-        self._i2c_write(0x94, address, out_buffer, out_start, out_end)
-        self._i2c_read(0x93, address, in_buffer, in_start, in_end)
+        pass
+        #self._i2c_write(0x94, address, out_buffer, out_start, out_end)
+        #self._i2c_read(0x93, address, in_buffer, in_start, in_end)
 
     def i2c_scan(self, *, start=0, end=0x79):
         """Perform an I2C Device Scan"""
+        pass
+        """
         found = []
         for addr in range(start, end + 1):
             # try a write
@@ -394,36 +300,49 @@ class MCP2221:
             # store if success
             found.append(addr)
         return found
+        """
 
     # ----------------------------------------------------------------
     # ADC
     # ----------------------------------------------------------------
     def adc_configure(self, vref=0):
         """Configure the Analog-to-Digital Converter"""
+        pass
+        """
         report = bytearray(b"\x60" + b"\x00" * 63)
         report[5] = 1 << 7 | (vref & 0b111)
         self._hid_xfer(report)
+        """
 
     def adc_read(self, pin):
         """Read from the Analog-to-Digital Converter"""
+        pass
+        """
         resp = self._hid_xfer(b"\x10")
         return resp[49 + 2 * pin] << 8 | resp[48 + 2 * pin]
+        """
 
     # ----------------------------------------------------------------
     # DAC
     # ----------------------------------------------------------------
     def dac_configure(self, vref=0):
         """Configure the Digital-to-Analog Converter"""
+        pass
+        """
         report = bytearray(b"\x60" + b"\x00" * 63)
         report[3] = 1 << 7 | (vref & 0b111)
         self._hid_xfer(report)
+        """
 
     # pylint: disable=unused-argument
     def dac_write(self, pin, value):
         """Write to the Digital-to-Analog Converter"""
+        pass
+        """
         report = bytearray(b"\x60" + b"\x00" * 63)
         report[4] = 1 << 7 | (value & 0b11111)
         self._hid_xfer(report)
+        """
 
     # pylint: enable=unused-argument
 

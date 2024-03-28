@@ -98,6 +98,8 @@ elif chip_id == ap_chip.LPC4330:
     from adafruit_blinka.microcontroller.nxp_lpc4330.pin import *
 elif chip_id == ap_chip.MCP2221:
     from adafruit_blinka.microcontroller.mcp2221.pin import *
+elif chip_id == ap_chip.FAKE_MCP2221:
+    from adafruit_blinka.microcontroller.fake_mcp2221.pin import *
 elif chip_id == ap_chip.A10:
     from adafruit_blinka.microcontroller.allwinner.a20.pin import *
 elif chip_id == ap_chip.A20:

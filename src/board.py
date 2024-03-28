@@ -226,6 +226,9 @@ elif board_id == ap_board.BINHO_NOVA:
 elif board_id == ap_board.MICROCHIP_MCP2221:
     from adafruit_blinka.board.microchip_mcp2221 import *
 
+elif board_id == ap_board.MICROCHIP_MCP2221:
+    from adafruit_blinka.board.fake_microchip_mcp2221 import *
+
 elif board_id == ap_board.GREATFET_ONE:
     from adafruit_blinka.board.greatfet_one import *
 
